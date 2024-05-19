@@ -1,0 +1,188 @@
+<!DOCTYPE html>
+<html lang="fr">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Automaton Editor</title>
+    <link rel="stylesheet" href="/src/style.css" />
+  </head>
+  <body>
+    <h1>Éditeur d’automates</h1>
+    <nav>
+      <button id="btn-state">
+        <svg width="50" height="50">
+          <circle
+            cx="50%"
+            cy="50%"
+            r="20"
+            stroke="#575279"
+            fill="none"
+            stroke-width="2"
+          />
+          <text x="48%" y="50%" dominant-baseline="middle" text-anchor="middle" fill="#575279">
+            𝑞
+          </text>
+        </svg>
+      </button>
+      <button id="btn-transition">
+        <svg width="50" height="50">
+          <defs>
+            <marker
+              id="arrowhead"
+              markerWidth="8"
+              markerHeight="6"
+              refX="0"
+              refY="3"
+              orient="auto"
+              markerUnits="strokeWidth"
+              fill="#575279"
+            >
+              <polygon points="0.5 0.5, 7.5 2.5, 0.5 5" />
+            </marker>
+          </defs>
+          <text x="48%" y="40%" dominant-baseline="middle" text-anchor="middle" fill="#575279">
+            𝚊
+          </text>
+          <line
+            x1="5%"
+            x2="60%"
+            y1="66%"
+            y2="66%"
+            stroke="#575279"
+            marker-end="url(#arrowhead)"
+            stroke-width="2.5"
+          />
+        </svg>
+      </button>
+      <span class="spacer">⋅</span>
+      <button id="btn-rm-eps">𝗋𝗆<sub>𝜀</sub></button>
+      <button id="btn-det">𝖽𝖾𝗍</button>
+      <button id="btn-comp">𝖼𝗈𝗆𝗉</button>
+      <span class="spacer">⋅</span>
+      <button id="btn-get-lang">↓<br>Reg</button>
+      <button id="btn-from-lang">↑<br>Reg</button>
+      <button id="btn-in-lang">∈ ℒ</button>
+    </nav>
+    <div id="display"></div>
+    <div id="container"></div>
+    <div class="context-menu context-menu-normal">
+      <button id="btn-clear">TOUT SUPPRIMER</button>
+      <button id="btn-undo">ANNULER</button>
+      <button id="btn-redo">REFAIRE</button>
+    </div>
+    <div class="context-menu context-menu-state">
+      <button id="btn-mk-init">INITIAL</button>
+      <button id="btn-mk-final">FINAL</button>
+      <button id="btn-del-state">SUPPRIMER</button>
+    </div>
+    <div class="context-menu context-menu-transition">
+      <button id="btn-rename-label">RENOMMER</button>
+      <button id="btn-del-transition">SUPPRIMER</button>
+    </div>
+    <br/>
+    <h1>Documentation</h1>
+    <main>
+      <p>
+        Cet outil sert à la manipulation d’automates : déterminisation,
+        réduction, suppression des
+        <span class="unbreakable"><span class="math">𝜀</span>-transitions</span
+        >, calcul d’expression régulières équivalentes... Le but de cet outil
+        est de pouvoir <i>vérifier</i> ses réponses, et non de les
+        <i>trouver</i>.
+        Vous pouvez vous déplacer sur l’interface, et <i>dézoomer</i> au besoin, si vous réalisez des automates ayant un grand nombre d’états.
+      </p>
+      <p>
+        L’éditeur d’automates a deux “modes” : ajout d’état ou ajout de
+        transitions. Les deux premiers boutons du menu permettent de passer
+        respectivement au mode “ajout d’états” et “ajout de transitions.”
+      </p>
+      <p>
+        En mode <b>ajout d’état</b>, un <i>double-click</i> permet d’ajouter un
+        état. Les états sont automatiquement numérotés. Un <i>click</i> sur un
+        état lui fera changer de type d’état : état normal, état initial
+        (bordure grasse), état final (double bordure). Les états peuvent être
+        déplacés.
+      </p>
+      <p>
+        En mode <b>ajout de transitions</b>, un <i>click</i> définit l’état de départ de la transition,
+        puis un second <i>click</i> définit l’état d’arrivée de la transition.
+        L’étiquette de la transition est ensuite demandée.
+        Pour obtenir une transition qui “boucle” sur un état, il suffit de faire un <i>double-click</i> sur l’état concerné.
+        Pour obtenir une 
+        <span class="unbreakable"><span class="math">𝜀</span>-transition</span>,
+        il suffit d’entrer le caractère ‘<span class="tt">&</span>’ comme étiquette de transition.
+        Les transitions sont automatiquement regroupées si elles ont mêmes états de départ et d’arrivée, et les étiquettes sont affichées séparées par des virgules.
+      </p>
+      <p>
+        Les autres boutons permettent la manipulation d’automates.
+        Attention : les états peuvent changer de place (et même de nom dans le cas de la déterminisation) après la manipulation.
+
+        <ul>
+          <li>
+            L’action “<span class="math unbreakable">𝗋𝗆<sub>𝜀</sub></span>” supprime les <span class="unbreakable"><span class="math">𝜀</span>-transitions</span> de l’automate, en conservant le même langage.
+          </li>
+          <li>
+            L’action “<span class="math unbreakable">𝖽𝖾𝗍</span>” déterminise l’automate. L’automate est automatiquement réduit après la déterminisation en utilisant l’algorithme de Brzozowski.
+          </li>
+          <li>
+            L’action “<span class="math unbreakable">𝖼𝗈𝗆𝗉</span>” complète l’automate en ajoutant un état “poubelle.”
+          </li>
+        </ul>
+      </p>
+      <p>
+        Les actions suivantes opèrent sur les langages des automates, et les expressions régulières.
+        <ul>
+          <li>
+            L’action “<span class="math unbreakable">→ Reg</span>” détermine une expression régulière ayant même langage que l’automate, par élimination d’états.
+          </li>
+          <li>
+            L’action “<span class="math unbreakable">← Reg</span>” crée un automate à partir d’une expression régulière, par la construction de Thompson.
+          </li>
+          <li>
+            L’action “<span class="math unbreakable">∈ ℒ</span>” teste l’appartenance d’un mot <span class="math unbreakable">𝑤</span> dans le langage de l’automate.
+          </li>
+        </ul>
+      </p>
+
+      <p>
+        Des menus contextuels (ouverts avec un <i>click</i> droit) permettent de réaliser plus d’actions.
+        Ces menus diffèrent en fonction de l'objet sélectionné (transition, état, ou aucun objet).
+
+        <ul>
+          <li>
+            En sélectionnant un état, on peut le supprimer, les transitions entrantes et sortantes sont également supprimées.
+            On peut également le transformer en état final ou initial, ces actions fonctionnent en “<i>toggle</i>” : l’action “passer en final” transformera un état final en état normal, et de même pour l’action “passer en initial.”
+          </li>
+          <li>
+            En sélectionnant une transition, on peut la supprimer, ou changer son étiquette.
+            La supprimer ne supprimera pas les états associés.
+          </li>
+          <li>
+            En ne sélectionnant aucun objet, on peut supprimer tous les états et transitions, annuler la dernière action ou la refaire.
+          </li>
+        </ul>
+      </p>
+
+      <p>
+        Des raccourcis claviers permettent de réaliser certaines tâches plus facilement.
+        Pour passer en mode “ajout d’état,” on peut appuyer sur ‘<span class="tt">s</span>.’
+        Pour passer en mode “ajout de transitions,” on peut appuyer sur ‘<span class="tt">t</span>.’
+
+        Pour annuler la dernière action, on peut appuyer sur ‘<span class="tt">Ctrl+Z</span>.’
+        Pour refaire la dernière action annulée, on peut appuyer sur ‘<span class="tt">Ctrl+Shift+Z</span>’ ou ‘<span class="tt">Ctrl+Y</span>.’
+      </p>
+
+      <p>
+        L’agencement des automates est réalisé automatiquement en utilisant un modèle basé sur la loi de Hooke (pour les transitions), la loi de Coulomb (pour les états) et des frottements pour la convergence des positions.
+        L’agencement obtenu n’est pas idéal, mais il est généralement <i>bien mieux</i> que celui obtenu en plaçant les nœuds sur une grille ou sur un cercle.
+      </p>
+
+      <p>
+        Ce projet a été réalisé dans le cadre du soutien en informatique en prépa <span class="math unbreakable">MPI<sup>(⋆|𝜀)</sup></span>
+        par Hugo SALOU.
+        En cas de <i>bug</i>, merci de me contacter via Discord (<i>username</i> : <span class="tt unbreakable">hugos29</span>).
+      </p>
+    </main>
+    <script type="module" src="/src/main.ts"></script>
+  </body>
+</html>

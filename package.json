@@ -1,0 +1,27 @@
+{
+  "name": "automaton-editor",
+  "private": true,
+  "version": "0.0.0",
+  "type": "module",
+  "scripts": {
+    "dev": "vite",
+    "build": "tsc && vite build",
+    "preview": "vite preview",
+    "compile-parser": "pegjs --format commonjs -o src/regexp.cjs src/regexp.pegjs"
+  },
+  "devDependencies": {
+    "@types/react": "^18.2.53",
+    "@types/react-dom": "^18.2.18",
+    "@vitejs/plugin-react": "^4.2.1",
+    "pegjs": "^0.10.0",
+    "typescript": "^5.0.2",
+    "vite": "^4.4.5"
+  },
+  "dependencies": {
+    "konva": "^9.2.2",
+    "ngraph.forcelayout": "^3.3.1",
+    "ngraph.graph": "^20.0.1",
+    "react": "^18.2.0",
+    "react-dom": "^18.2.0"
+  }
+}
